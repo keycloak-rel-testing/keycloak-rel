@@ -39,8 +39,9 @@ jobs:
     needs: [create-tags, create-releases]
     uses: ./.github/workflows/x-keycloak-nodejs-admin.yml
     with:
-      version: ${{ github.event.inputs.version }}
       tag: ${{ github.event.inputs.version }}
+      version: ${{ github.event.inputs.version }}
+      npm-publish: true
     secrets:
       GH_ORG: ${{ secrets.GH_ORG }}
       GH_TOKEN: ${{ secrets.GH_TOKEN }}

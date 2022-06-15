@@ -9,7 +9,7 @@ on:
         required: false
         type: string
         default: main
-      create-commit:
+      set-versions:
         required: false
         type: boolean
         default: false
@@ -38,7 +38,7 @@ jobs:
           ref: ${{ inputs.branch }}
 
       - name: Create version commit
-        if: inputs.create-commit
+        if: inputs.set-versions
         working-directory: ${{ matrix.repository }}
         run: |
           ./set-version.sh ${{ inputs.tag }}

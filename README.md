@@ -128,7 +128,7 @@ Nightly release uses `nightly` tag.
 |Container|Main|Test|
 |---------|----|----|
 |Keycloak|https://quay.io/repository/keycloak/keycloak|https://quay.io/repository/keycloak/keycloak|https://quay.io/repository/keycloaktesting/keycloak|
-|Operator|https://quay.io/repository/keycloak/keycloak-operator|https://quay.io/repository/keycloak/keycloak|https://quay.io/repository/keycloaktesting/keycloak-operator|
+|Operator|https://quay.io/repository/keycloak/keycloak/operator|https://quay.io/repository/keycloak/keycloak|https://quay.io/repository/keycloaktesting/keycloak-operator|
 
 ## K8s resources
 

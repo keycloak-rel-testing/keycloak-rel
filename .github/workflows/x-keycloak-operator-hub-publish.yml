@@ -1,0 +1,136 @@
+name: X Keycloak Operator Hub publish
+
+on:
+  workflow_call:
+    inputs:
+      gh-org:
+        required: true
+        type: string
+      quay-org:
+        required: true
+        type: string
+      community-operators-repo:
+        required: true
+        type: string
+      prod-operators-repo:
+        required: true
+        type: string
+      mvn-url:
+        required: true
+        type: string
+      version:
+        required: true
+        type: string
+    secrets:
+      GH_TOKEN:
+        required: true
+      MVN_USERNAME:
+        required: true
+      MVN_TOKEN:
+        required: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup Java
+        uses: actions/setup-java@v3.0.0
+        with:
+          distribution: 'temurin'
+          java-version: 11
+
+      - name: Checkout Repository
+        uses: actions/checkout@v3.0.0
+        with:
+          repository: '${{ inputs.gh-org }}/keycloak'
+          token: ${{ secrets.GH_TOKEN }}
+          ref: ${{ inputs.version }}
+          path: keycloak
+
+      - name: Build
+        env:
+          MAVEN_ID: kc-rel-repository
+          MAVEN_URL: ${{ inputs.mvn-url }}
+          MAVEN_USERNAME: ${{ secrets.MVN_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.MVN_TOKEN }}
+        working-directory: keycloak
+        # hardcoded Quay.io image coordinates here are used only for building the K8s YAML resources (where we use Quay and not Docker Hub)
+        run: |
+          ./mvnw clean package \
+              -s ./.github/mvn-rel-settings.xml \
+              -f operator/pom.xml \
+              -DskipTests \
+              -Dquarkus.container-image.image=quay.io/${{ inputs.quay-org }}/keycloak-operator:${{ inputs.version }} \
+              -Dquarkus.container-image.build=true \
+              -Dquarkus.jib.image-id-file=image-id.txt \
+              -Doperator.keycloak.image=quay.io/${{ inputs.quay-org }}/keycloak:${{ inputs.version }}
+
+      - name: Install Yq
+        working-directory: keycloak
+        run: sudo snap install yq
+
+      - name: Fetch previous version of Keycloak
+        working-directory: keycloak
+        run: echo ::set-output name=previous_version::$(git describe --tags $(git rev-list --tags --max-count=1))
+
+      - name: Create OLM Bundle
+        working-directory: keycloak
+        run: ./operator/scripts/create-olm-bundle.sh ${{ inputs.version }} ${{ steps.vars.outputs.previous_version }} quay.io/${{ inputs.quay-org }}/keycloak-operator
+
+      - name: Clone community-operators
+        uses: actions/checkout@v3
+        with:
+          repository: keycloak-bot/community-operators
+          path: community-operators
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: Automatic Community PR opening
+        working-directory: community-operators
+        run: |
+          git remote add upstream ${{ inputs.community-operators-repo }}
+          git fetch upstream
+          
+          git checkout upstream/main -B releases/${{ inputs.version }}
+          
+          mkdir -p operators/keycloak-operator/${{ inputs.version }}
+          cp -r ../operator/olm/${{ inputs.version }}/* operators/keycloak-operator/${{ inputs.version }}/
+          
+          git config --global user.email "keycloak-bot@keycloak.com"
+          git config --global user.name "keycloak-bot"
+          
+          git add .
+          git commit -s -m "Bump Keycloak operator to ${{ inputs.version }}"
+          
+          git push origin HEAD --force
+          
+          gh pr create --title "Bump Keycloak operator to ${{ inputs.version }}" --fill --repo ${{ inputs.community-operators-repo }}
+
+      - name: Clone community-operators-prod
+        uses: actions/checkout@v3
+        with:
+          repository: keycloak-bot/community-operators-prod
+          path: community-operators-prod
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: Automatic Prod PR opening
+        working-directory: community-operators-prod
+        run: |
+          git remote add upstream ${{ inputs.prod-operators-repo }}
+          git fetch upstream
+          
+          git checkout upstream/main -B releases/${{ inputs.version }}
+          
+          mkdir -p operators/keycloak-operator/${{ inputs.version }}
+          cp -r ../operator/olm/${{ inputs.version }}/* operators/keycloak-operator/${{ inputs.version }}/
+          
+          git add .
+          git commit -s -m "Bump Keycloak operator to ${{ inputs.version }}"
+          
+          git push origin HEAD --force
+          
+          gh pr create --title "Bump Keycloak operator to ${{ inputs.version }}" --fill --repo ${{ inputs.prod-operators-repo }}

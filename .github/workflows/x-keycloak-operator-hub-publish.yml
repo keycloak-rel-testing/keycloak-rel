@@ -44,10 +44,10 @@ jobs:
           private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
 
-      - name: Download Keycloak OLM bundle
-        uses: actions/download-artifact@v4
-        with:
-          name: olm-bundle-keycloak
+     # - name: Download Keycloak OLM bundle
+     #   uses: actions/download-artifact@v4
+     #   with:
+     #     name: olm-bundle-keycloak
 
       - name: Set custom variables
         run: |
@@ -84,9 +84,10 @@ jobs:
           git checkout upstream/main -B ${{ inputs.version }}
           
           mkdir -p operators/keycloak-operator/${{ inputs.version }}
-          tar -C operators/keycloak-operator/${{ inputs.version }} --use-compress-program="zstd -d" -xf ../olm-bundle-keycloak-${{ inputs.version }}.tzst
           
-          git add operators/
+          touch test
+          echo "test2" > test
+          git add test
           
           git config user.name '${{ inputs.release-bot-name }}'
           git config user.email '${{ inputs.release-bot-email }}'

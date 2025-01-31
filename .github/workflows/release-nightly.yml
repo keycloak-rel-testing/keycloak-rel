@@ -19,82 +19,82 @@ jobs:
     if: github.event_name != 'schedule' || github.repository_owner == 'keycloak-rel'
     uses: ./.github/workflows/x-env.yml
 
-  create-tags:
-    name: Create tags
-    needs: [env]
-    uses: ./.github/workflows/x-create-tags.yml
-    with:
-      gh-org: ${{ needs.env.outputs.gh-org }}
-      tag: nightly
-    secrets:
-      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  #create-tags:
+  #  name: Create tags
+  #  needs: [env]
+  #  uses: ./.github/workflows/x-create-tags.yml
+  #  with:
+  #    gh-org: ${{ needs.env.outputs.gh-org }}
+  #    tag: nightly
+  #  secrets:
+  #    GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
-  create-gh-releases:
-    name: Create Github releases
-    needs: [env, create-tags]
-    uses: ./.github/workflows/x-create-gh-releases.yml
-    with:
-      gh-org: ${{ needs.env.outputs.gh-org }}
-      tag: nightly
-    secrets:
-      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  #create-gh-releases:
+  #  name: Create Github releases
+  #  needs: [env, create-tags]
+  #  uses: ./.github/workflows/x-create-gh-releases.yml
+  #  with:
+  #    gh-org: ${{ needs.env.outputs.gh-org }}
+  #    tag: nightly
+  #  secrets:
+  #    GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
-  keycloak:
-    name: Keycloak
-    needs: [env, create-tags, create-gh-releases]
-    uses: ./.github/workflows/x-keycloak.yml
-    with:
-      gh-org: ${{ needs.env.outputs.gh-org }}
-      mvn-url: ${{ needs.env.outputs.mvn-snapshots-url }}
-      version: 999.0.0-SNAPSHOT
-      tag: nightly
-    secrets:
-      GH_TOKEN: ${{ secrets.GH_TOKEN }}
-      MVN_USERNAME: ${{ secrets.MVN_USERNAME }}
-      MVN_TOKEN: ${{ secrets.MVN_TOKEN }}
-      GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-      GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+  #keycloak:
+  #  name: Keycloak
+  #  needs: [env, create-tags, create-gh-releases]
+  #  uses: ./.github/workflows/x-keycloak.yml
+  #  with:
+  #    gh-org: ${{ needs.env.outputs.gh-org }}
+  #    mvn-url: ${{ needs.env.outputs.mvn-snapshots-url }}
+  #    version: 999.0.0-SNAPSHOT
+  #    tag: nightly
+  #  secrets:
+  #    GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  #    MVN_USERNAME: ${{ secrets.MVN_USERNAME }}
+  #    MVN_TOKEN: ${{ secrets.MVN_TOKEN }}
+  #    GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+  #    GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
 
-  keycloak-container:
-    name: Keycloak Container
-    needs: [env, create-tags, keycloak]
-    uses: ./.github/workflows/x-keycloak-container.yml
-    with:
-      gh-org: ${{ needs.env.outputs.gh-org }}
-      quay-org: ${{ needs.env.outputs.quay-org }}
-      docker-org: ${{ needs.env.outputs.docker-org }}
-      version: 999.0.0-SNAPSHOT
-      tag: nightly
-    secrets:
-      GH_TOKEN: ${{ secrets.GH_TOKEN }}
-      QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
-      QUAY_TOKEN: ${{ secrets.QUAY_TOKEN }}
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+  #keycloak-container:
+  #  name: Keycloak Container
+  #  needs: [env, create-tags, keycloak]
+  #  uses: ./.github/workflows/x-keycloak-container.yml
+  #  with:
+  #    gh-org: ${{ needs.env.outputs.gh-org }}
+  #    quay-org: ${{ needs.env.outputs.quay-org }}
+  #    docker-org: ${{ needs.env.outputs.docker-org }}
+  #    version: 999.0.0-SNAPSHOT
+  #    tag: nightly
+  #  secrets:
+  #    GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  #    QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
+  #    QUAY_TOKEN: ${{ secrets.QUAY_TOKEN }}
+  #    DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  #    DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
 
-  keycloak-operator:
-    name: Keycloak Operator
-    needs: [env, create-tags,keycloak-container]
-    uses: ./.github/workflows/x-keycloak-operator.yml
-    with:
-      gh-org: ${{ needs.env.outputs.gh-org }}
-      quay-org: ${{ needs.env.outputs.quay-org }}
-      docker-org: ${{ needs.env.outputs.docker-org }}
-      mvn-url: ${{ needs.env.outputs.mvn-snapshots-url }}
-      version: 999.0.0-SNAPSHOT
-      tag: nightly
-    secrets:
-      GH_TOKEN: ${{ secrets.GH_TOKEN }}
-      MVN_USERNAME: ${{ secrets.MVN_USERNAME }}
-      MVN_TOKEN: ${{ secrets.MVN_TOKEN }}
-      QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
-      QUAY_TOKEN: ${{ secrets.QUAY_TOKEN }}
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+  #keycloak-operator:
+  #  name: Keycloak Operator
+  #  needs: [env, create-tags,keycloak-container]
+  #  uses: ./.github/workflows/x-keycloak-operator.yml
+  #  with:
+  #    gh-org: ${{ needs.env.outputs.gh-org }}
+  #    quay-org: ${{ needs.env.outputs.quay-org }}
+  #    docker-org: ${{ needs.env.outputs.docker-org }}
+  #    mvn-url: ${{ needs.env.outputs.mvn-snapshots-url }}
+  #    version: 999.0.0-SNAPSHOT
+  #    tag: nightly
+  #  secrets:
+  #    GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  #    MVN_USERNAME: ${{ secrets.MVN_USERNAME }}
+  #    MVN_TOKEN: ${{ secrets.MVN_TOKEN }}
+  #    QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
+  #    QUAY_TOKEN: ${{ secrets.QUAY_TOKEN }}
+  #    DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  #    DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
 
   publish-keycloak-operator-hub:
     name: Publish Keycloak Operator to OperatorHub
-    needs: [ env, keycloak-operator ]
+    needs: [ env]
     uses: ./.github/workflows/x-keycloak-operator-hub-publish.yml
     with:
       version: 999.0.0-SNAPSHOT
@@ -106,12 +106,12 @@ jobs:
     secrets:
       RELEASE_BOT_PRIVATE_KEY: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
 
-  publish-gh-releases:
-    name: Publish releases
-    needs: [env, keycloak]
-    uses: ./.github/workflows/x-publish-gh-releases.yml
-    with:
-      gh-org: ${{ needs.env.outputs.gh-org }}
-      tag: nightly
-    secrets:
-      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  #publish-gh-releases:
+  #  name: Publish releases
+  #  needs: [env, keycloak]
+  #  uses: ./.github/workflows/x-publish-gh-releases.yml
+  #  with:
+  #    gh-org: ${{ needs.env.outputs.gh-org }}
+  #    tag: nightly
+  #  secrets:
+  #    GH_TOKEN: ${{ secrets.GH_TOKEN }}

@@ -99,8 +99,8 @@ jobs:
     with:
       version: 999.0.0-SNAPSHOT
       previous-version: 998.0.0-SNAPSHOT
-      community-operators-org: keycloak-rel
-      prod-operators-org: keycloak-rel
+      community-operators-org: keycloak-rel-testing
+      prod-operators-org: keycloak-rel-testing
       release-bot-email: ${{ needs.env.outputs.release-bot-email }}
       release-bot-name: ${{ needs.env.outputs.release-bot-name }}
     secrets:

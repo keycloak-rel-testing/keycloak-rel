@@ -33,6 +33,12 @@ jobs:
   env:
     uses: ./.github/workflows/x-env.yml
 
+  print-env:
+    runs-on: ubuntu
+    needs: env
+    steps:
+      - run: echo ${{ needs.env.outputs.mvn-deploy-options }}
+
   create-tags:
     name: Create tags
     needs: [env]

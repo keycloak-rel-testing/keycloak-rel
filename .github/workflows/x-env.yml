@@ -52,3 +52,6 @@ jobs:
       - id: load-env
         run: |
           cat .github/env/${{ github.repository_owner }} | sed -r '/^\s*$/d' >> $GITHUB_ENV
+      - id: echo-env
+        run:
+          echo ${{ env.mvn-deploy-options }}

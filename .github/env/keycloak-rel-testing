@@ -1,6 +1,6 @@
 gh-org=keycloak-rel-testing
 
-mvn-deploy-options=-DaltDeploymentRepository=keycloak-publish::https://maven.pkg.github.com/keycloak-rel-testing/maven
+mvn-deploy-options=-DaltDeploymentRepository=keycloak-publish::default::https://maven.pkg.github.com/keycloak-rel-testing/maven
 
 quay-org=keycloaktesting
 docker-org=keycloaktesting

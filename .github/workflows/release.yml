@@ -34,7 +34,7 @@ jobs:
     uses: ./.github/workflows/x-env.yml
 
   print-env:
-    runs-on: ubuntu
+    runs-on: ubuntu-latest
     needs: env
     steps:
       - run: echo ${{ needs.env.outputs.mvn-deploy-options }}

@@ -37,7 +37,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: env
     steps:
-      - run: echo ${{ needs.env.outputs.mvn-deploy-options }}
+      - run: |
+          echo ${{ needs.env.outputs.mvn-deploy-options }}
+          echo ${{ needs.env.outputs.prod-operators-org }}
 
   create-tags:
     name: Create tags

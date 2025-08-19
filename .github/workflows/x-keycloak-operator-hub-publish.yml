@@ -41,25 +41,25 @@ jobs:
           private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
 
-      - name: Download Keycloak OLM bundle
-        uses: actions/download-artifact@v4
-        with:
-          name: olm-bundle-keycloak
+      #- name: Download Keycloak OLM bundle
+      #  uses: actions/download-artifact@v4
+      #  with:
+      #    name: olm-bundle-keycloak
 
       - name: Set custom variables
         run: |
           if [[ "${{ matrix.type }}" == "community" ]]; then
-            REPO_ORG="${{ inputs.community-operators-org }}"
+            REPO_ORG="k8s-operatorhub"
             REPO_NAME="community-operators"
           else
-            REPO_ORG="${{ inputs.prod-operators-org }}"
+            REPO_ORG="redhat-openshift-ecosystem"
             REPO_NAME="community-operators-prod"
           fi
 
           echo "repository-org=$REPO_ORG" >> $GITHUB_ENV
           echo "repository-name=$REPO_NAME" >> $GITHUB_ENV
           echo "repository-url=https://github.com/$REPO_ORG/$REPO_NAME.git" >> $GITHUB_ENV
-          echo "reviewers=stianst,abstractj,vmuzikar,mabartos" >> $GITHUB_ENV
+          echo "reviewers=mabartos" >> $GITHUB_ENV
 
       - name: Clone community-operators
         uses: actions/checkout@v4
@@ -81,8 +81,9 @@ jobs:
           git checkout upstream/main -B ${{ inputs.version }}
           
           mkdir -p operators/keycloak-operator/${{ inputs.version }}
-          tar -C operators/keycloak-operator/${{ inputs.version }} --use-compress-program="zstd -d" -xf ../olm-bundle-keycloak-${{ inputs.version }}.tzst
           
+          echo "test" > operators/keycloak-operator/${{ inputs.version }}/test123.txt
+                    
           git add operators/
           
           git config user.name '${{ inputs.release-bot-name }}'
@@ -93,8 +94,9 @@ jobs:
           git push -f origin ${{ inputs.version }}
 
       - name: Automatic PR opening
+        if: false # We disable automatic PR opening now as there are failures like: pull request create failed: GraphQL: Resource not accessible by integration (createPullRequest)
         working-directory: community-operators
-        # Once we are okay with the release process, remove reviewers
+        # Once we are okay with the release process, remove reviewers -> EDIT: reviewers removed for now as users cannot be found
         env:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
@@ -108,7 +110,7 @@ jobs:
           fi
           
           if [[ "$prOpen" == "false" ]]; then
-            gh pr create --title "operator keycloak-operator (${{ inputs.version }})" --repo ${{ env.repository-url }} --base main -F docs/pull_request_template.md --head ${{ github.repository_owner }}:${{ inputs.version }} -r ${{ env.reviewers }}
+            gh pr create --title "operator keycloak-operator (${{ inputs.version }})" --repo ${{ env.repository-url }} --base main -F docs/pull_request_template.md --head ${{ github.repository_owner }}:${{ inputs.version }}
           else
             echo "PR already exists, skipping..."
           fi

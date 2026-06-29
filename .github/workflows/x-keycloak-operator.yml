@@ -152,6 +152,19 @@ jobs:
           mkdir -p kubernetes
           cp -r ../keycloak/operator/target/kubernetes/*.yml kubernetes
 
+          # run a second time to create the cluster wide yml artifacts
+          cd ../keycloak
+          ./mvnw -B clean package \
+              -am -pl operator -Doperator \
+              -DskipTests \
+              -Dquarkus.container-image.image=quay.io/${{ inputs.quay-org }}/keycloak-operator:${{ inputs.tag }} \
+              -Dkc.operator.keycloak.image=quay.io/${{ inputs.quay-org }}/keycloak:${{ inputs.tag }} \
+              -Pcluster-wide
+          cd ../keycloak-k8s-resources
+
+          mkdir -p kubernetes/cluster-wide
+          cp -r ../keycloak/operator/target/kubernetes/*.yml kubernetes/cluster-wide
+
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
 
